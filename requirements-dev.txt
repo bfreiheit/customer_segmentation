@@ -1,0 +1,7 @@
+jupyter
+ipykernel
+black
+flake8
+matplotlib-inline
+python-dotenv
+pytest

@@ -3,11 +3,14 @@ PYTHON = $(VENV_DIR)/bin/python
 PIP = $(VENV_DIR)/bin/pip
 
 venv:
-	python -m venv $(VENV_DIR)
+	python3 -m venv $(VENV_DIR)
 
 install:
 	$(PIP) install --upgrade pip setuptools wheel
 	$(PIP) install -e .
+
+install-dev: install
+	$(PIP) install -r requirements-dev.txt
 
 update:
 	$(PIP) install -e .
@@ -39,6 +42,7 @@ help:
 	@echo "available targets:"
 	@echo "  make venv       → erstellt die venv"
 	@echo "  make install    → installs project from pyproject.toml"
+	@echo "  make install-dev → installiert Projekt und dev-Abhängigkeiten"
 	@echo "  make update     → update project/dependencies"
 	@echo "  make notebook   → starts Jupyter Notebook in ./notebooks"
 	@echo "  make clean      → deletes __pycache__ directories"

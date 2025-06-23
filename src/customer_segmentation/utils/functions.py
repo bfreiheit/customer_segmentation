@@ -11,7 +11,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates 
 
-from travel_tide.utils import queries
+from customer_segmentation.utils import queries
 importlib.reload(queries)
 
 load_dotenv(override=True)

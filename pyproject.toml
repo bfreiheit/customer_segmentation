@@ -26,7 +26,6 @@ dependencies = [
 
 [tool.setuptools]
 package-dir = {"" = "src"}
-packages = ["customer_segmentation"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -14,7 +14,7 @@ hotels AS (
         CASE WHEN check_out_time::date - check_in_time::date <= 0 
         THEN 1 ELSE check_out_time::date - check_in_time::date 
         END as nights, 
-
+                
         rooms,      
         hotel_per_room_usd
     FROM hotels            
@@ -136,9 +136,9 @@ GROUP BY
 HAVING
   COUNT(s.session_id) >= 5
   AND (
-       -- entweder keine Buchung
+       -- users with no bookings
        MAX(CASE WHEN t.trip_id IS NOT NULL THEN s.session_start::date END) IS NULL
-       -- oder letzte Buchung war vor mehr als 7 Tagen
+       -- or users who's last booking was more than 7 days ago
        OR (MAX(s.session_start::date) - MAX(
              CASE WHEN t.trip_id IS NOT NULL THEN s.session_start::date END)) > 7
 );

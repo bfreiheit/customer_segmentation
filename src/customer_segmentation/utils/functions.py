@@ -18,8 +18,8 @@ load_dotenv(override=True)
 
 def read_from_db(model_name: str) -> pd.DataFrame:
     """
-    Lies die SQL-Datei <model_name>.sql aus dem sql/ Verzeichnis und
-    lade die Ergebnisse aus der Datenbank in ein pandas.DataFrame.
+    load the sql file <model_name>.sql from sql/ directory 
+    and load data into a pandas.DataFrame.
     """
     # load SQL from resource 
     sql_path = resources.files('customer_segmentation.utils').joinpath(

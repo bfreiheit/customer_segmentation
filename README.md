@@ -26,7 +26,8 @@ customer_segmentation/
 │   │   └── utils
 │   │       ├── __init__.py
 │   │       ├── functions.py
-│   │       └── queries.py
+│   │       └── sql
+│   │           └── customer_data_model.sql
 └── tests
 ```
 

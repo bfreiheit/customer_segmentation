@@ -2,12 +2,15 @@
 WITH max_date AS (
     SELECT MAX(session_start::date) AS max_session_date FROM sessions
 ),
+
 session_duration AS (
-        SELECT user_id,      
+    SELECT 
+        user_id,      
         session_id,
         EXTRACT(EPOCH FROM (session_end - session_start)) AS session_duration_seconds
-        FROM sessions     
+    FROM sessions     
 ),
+
 hotels AS (
     SELECT 
         trip_id,         
@@ -36,6 +39,19 @@ flights AS (
     FROM flights        
 ),
 
+advance_days_per_trip AS (
+  SELECT
+    s.user_id,
+    s.trip_id,   
+    GREATEST(
+      flights.departure_time::date - CASE WHEN s.trip_id IS NOT NULL THEN s.session_start::date END,
+      hotels.check_in_time::date - CASE WHEN s.trip_id IS NOT NULL THEN s.session_start::date END
+    ) AS days_advance_booking
+  FROM sessions s
+  LEFT JOIN flights USING(trip_id)
+  LEFT JOIN hotels USING(trip_id)
+),
+
 trip_agg AS (
   SELECT 
     trip_id,
@@ -58,7 +74,8 @@ trip_agg_with_lag AS (
 ),
 
 trip_level AS (
-    SELECT t.trip_id,
+    SELECT 
+    t.trip_id,
     t.user_id,
     t.is_cancelled,
     t.trip_date,
@@ -106,7 +123,8 @@ SELECT
     MAX(s.session_start::date) - MIN(u.sign_up_date::date) AS days_active,  
     ROUND(AVG(d.session_duration_seconds)) AS avg_session_duration_seconds,  
     MAX(CASE WHEN s.flight_booked THEN 1 ELSE 0 END) AS has_flight_booked,
-    MAX(CASE WHEN s.hotel_booked THEN 1 ELSE 0 END)  AS has_hotel_booked,  
+    MAX(CASE WHEN s.hotel_booked THEN 1 ELSE 0 END)  AS has_hotel_booked,
+    ROUND(COALESCE(AVG(days_advance_booking), 0)) AS avg_days_advance_booking  
     -- discount info   
     ROUND(COALESCE(SUM(t.flight_price * s.flight_discount_amount), 0), 2)  AS sum_flight_discount,
     ROUND(COALESCE(SUM(t.hotel_price * s.hotel_discount_amount), 0), 2)  AS sum_hotel_discount,  
@@ -118,6 +136,7 @@ FROM sessions s
 LEFT JOIN users u ON s.user_id = u.user_id
 LEFT JOIN trip_level t on s.trip_id = t.trip_id AND s.user_id = t.user_id
 LEFT JOIN session_duration d ON s.session_id = d.session_id AND s.user_id = d.user_id
+LEFT JOIN advance_days_per_trip a ON s.trip_id = a.trip_id AND s.user_id = a.user_id
 CROSS JOIN max_date md
 WHERE 
     (md.max_session_date - u.birthdate::date) / 365 BETWEEN 18 AND 90
@@ -125,7 +144,7 @@ WHERE
     AND u.sign_up_date::date >= md.max_session_date - INTERVAL '12 months' 
     AND u.sign_up_date::date <= md.max_session_date - INTERVAL '1 month'   
 GROUP BY 
-    s.user_id, age, has_childrren, is_married
+    s.user_id, age, has_children, is_married
 HAVING
   COUNT(s.session_id) >= 5
   AND (

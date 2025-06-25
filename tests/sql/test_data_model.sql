@@ -22,3 +22,28 @@ ORDER BY 1
 group by 1, 2
 order by 1
 ;
+
+WITH advance_days_per_trip AS (
+  SELECT
+    s.user_id,
+    s.trip_id,
+    flights.departure_time::date - CASE WHEN s.trip_id IS NOT NULL THEN s.session_start::date END as date1,
+    hotels.check_in_time::date - CASE WHEN s.trip_id IS NOT NULL THEN s.session_start::date END as date2,
+    GREATEST(
+      flights.departure_time::date - CASE WHEN s.trip_id IS NOT NULL THEN s.session_start::date END,
+      hotels.check_in_time::date - CASE WHEN s.trip_id IS NOT NULL THEN s.session_start::date END
+    ) AS days_advance_booking
+  FROM sessions s
+  LEFT JOIN flights USING(trip_id)
+  LEFT JOIN hotels USING(trip_id)
+)
+SELECT
+  user_id,
+  round(avg(date1)) as date1,
+  round(avg(date2)) as date2,
+  ROUND(AVG(days_advance_booking)) AS avg_days_advance_booking
+FROM advance_days_per_trip
+WHERE days_advance_booking IS NOT NULL
+GROUP BY user_id
+LIMIT 50;
+

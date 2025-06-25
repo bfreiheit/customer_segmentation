@@ -76,8 +76,9 @@ trip_level AS (
 SELECT 
     s.user_id,
     -- user info
-    --(md.max_session_date - u.birthdate::date) / 365 AS age,    
-    --CASE WHEN u.has_children THEN 1 ELSE 0 END AS has_children,
+    (md.max_session_date - u.birthdate::date) / 365 AS age,    
+    CASE WHEN u.has_children THEN 1 ELSE 0 END AS has_children,
+    CASE WHEN u.married THEN 1 ELSE 0 END AS is_married,
     -- trip info
     ROUND(COALESCE(SUM(CASE WHEN t.trip_id IS NOT NULL THEN 1 ELSE 0 END), 0)) AS cnt_trips, 
     ROUND(COALESCE(SUM(CASE WHEN t.trip_id IS NOT NULL THEN t.is_cancelled ELSE 0 END), 0)) AS cnt_cancellations,  
@@ -124,7 +125,7 @@ WHERE
     AND u.sign_up_date::date >= md.max_session_date - INTERVAL '12 months' 
     AND u.sign_up_date::date <= md.max_session_date - INTERVAL '1 month'   
 GROUP BY 
-    s.user_id
+    s.user_id, age, has_childrren, is_married
 HAVING
   COUNT(s.session_id) >= 5
   AND (

@@ -1,34 +1,48 @@
--- test cancellation logic
- with trips as (SELECT     
-    user_id,
-    s.trip_id,   
-    rooms,
-    seats,
-    cancellation,
-    flight_booked,
-    hotel_booked  
-FROM sessions s
-JOIN flights f ON s.trip_id = f.trip_id
-JOIN hotels h ON s.trip_id = h.trip_id
-WHERE s.trip_id IS NOT NULL
-ORDER BY 1
- )
- select user_id,
- trip_id,
- sum(case when flight_booked then 1 else 0 end) flight_booked,
- sum(case when hotel_booked then 1 else 0 end) hotel_booked,
- MAX(CASE WHEN cancellation THEN 1 ELSE 0 END) AS is_cancelled
- from trips
-group by 1, 2
-order by 1
-;
 
-WITH advance_days_per_trip AS (
+WITH max_date AS (
+    SELECT MAX(session_start::date) AS max_session_date FROM sessions
+),
+
+session_duration AS (
+    SELECT 
+        user_id,      
+        session_id,
+        EXTRACT(EPOCH FROM (session_end - session_start)) AS session_duration_seconds
+    FROM sessions     
+),
+
+hotels_select AS (
+    SELECT 
+        trip_id,         
+        CASE WHEN check_out_time::date - check_in_time::date <= 0 
+        THEN 1 ELSE check_out_time::date - check_in_time::date 
+        END as nights, 
+        hotel_per_room_usd * rooms * nights AS hotel_price       
+    FROM hotels            
+),
+
+flights_select AS (
+    SELECT 
+        trip_id,
+        CASE WHEN return_time::date - departure_time::date <= 0 
+        THEN 1 
+        ELSE return_time::date - departure_time::date 
+        END as travel_days,         
+
+        CASE WHEN return_flight_booked 
+        THEN ROUND(base_fare_usd / 2, 2)
+        ELSE ROUND(base_fare_usd, 2)
+        END AS flight_price,      
+
+        destination_airport_lat,
+        destination_airport_lon
+    FROM flights        
+),
+
+advance_days_per_trip AS (
   SELECT
     s.user_id,
-    s.trip_id,
-    flights.departure_time::date - CASE WHEN s.trip_id IS NOT NULL THEN s.session_start::date END as date1,
-    hotels.check_in_time::date - CASE WHEN s.trip_id IS NOT NULL THEN s.session_start::date END as date2,
+    s.trip_id,   
     GREATEST(
       flights.departure_time::date - CASE WHEN s.trip_id IS NOT NULL THEN s.session_start::date END,
       hotels.check_in_time::date - CASE WHEN s.trip_id IS NOT NULL THEN s.session_start::date END
@@ -36,14 +50,108 @@ WITH advance_days_per_trip AS (
   FROM sessions s
   LEFT JOIN flights USING(trip_id)
   LEFT JOIN hotels USING(trip_id)
-)
-SELECT
-  user_id,
-  round(avg(date1)) as date1,
-  round(avg(date2)) as date2,
-  ROUND(AVG(days_advance_booking)) AS avg_days_advance_booking
-FROM advance_days_per_trip
-WHERE days_advance_booking IS NOT NULL
-GROUP BY user_id
-LIMIT 50;
+),
 
+trip_agg AS (
+  SELECT 
+    trip_id,
+    user_id,
+    MAX(CASE WHEN cancellation THEN 1 ELSE 0 END) AS is_cancelled,
+    MIN(session_start::date) AS trip_date
+  FROM sessions
+  WHERE trip_id IS NOT NULL
+  GROUP BY trip_id, user_id
+),
+
+trip_agg_with_lag AS (
+  SELECT
+    trip_id,
+    user_id,
+    is_cancelled,
+    trip_date,
+    LAG(trip_date) OVER (PARTITION BY user_id ORDER BY trip_date) AS prev_trip_date
+  FROM trip_agg
+),
+
+trip_level AS (
+    SELECT 
+    t.trip_id,
+    t.user_id,
+    t.is_cancelled,
+    t.trip_date,
+    t.prev_trip_date,  
+    f.travel_days,   
+    f.flight_price,  
+    f.destination_airport_lat,
+    f.destination_airport_lon,  
+    h.nights,
+    h.hotel_price
+    FROM trip_agg_with_lag t
+    LEFT JOIN flights_select f ON t.trip_id = f.trip_id
+    LEFT JOIN hotels_select h ON t.trip_id = h.trip_id
+)
+SELECT 
+    s.user_id,
+    -- user info
+    (md.max_session_date - u.birthdate::date) / 365 AS age,    
+    CASE WHEN u.has_children THEN 1 ELSE 0 END AS has_children,
+    CASE WHEN u.married THEN 1 ELSE 0 END AS is_married,
+    -- trip info
+    ROUND(COALESCE(SUM(CASE WHEN t.trip_id IS NOT NULL THEN 1 ELSE 0 END), 0)) AS cnt_trips, 
+    ROUND(COALESCE(SUM(CASE WHEN t.trip_id IS NOT NULL THEN t.is_cancelled ELSE 0 END), 0)) AS cnt_cancellations,  
+    ROUND(COALESCE(AVG(t.trip_date - t.prev_trip_date), 0)) as avg_diff_trip_days,
+    COALESCE(MAX(s.session_start::date) - MAX(CASE WHEN t.trip_date IS NOT NULL THEN t.trip_date END), 0) AS days_last_trip,  
+    -- flight info     
+    ROUND(COALESCE(SUM(t.travel_days), 0)) AS sum_flight_travel_days,   
+    ROUND(COALESCE(SUM(t.flight_price), 0), 2) AS sum_flight_price, 
+    ROUND(COALESCE(AVG(6371 * acos(
+        cos(radians(u.home_airport_lat)) * cos(radians(t.destination_airport_lat)) * 
+        cos(radians(u.home_airport_lon) - radians(t.destination_airport_lon)) +
+        sin(radians(u.home_airport_lat)) * sin(radians(t.destination_airport_lat))
+    )), 0)) AS avg_distance_km,
+    ROUND(COALESCE(SUM(6371 * acos(
+        cos(radians(u.home_airport_lat)) * cos(radians(t.destination_airport_lat)) * 
+        cos(radians(u.home_airport_lon) - radians(t.destination_airport_lon)) +
+        sin(radians(u.home_airport_lat)) * sin(radians(t.destination_airport_lat))
+    )), 0)) AS sum_distance_km,
+    -- hotel info       
+    ROUND(COALESCE(SUM(t.nights), 0)) AS sum_hotel_nights,     
+    ROUND(COALESCE(SUM(t.hotel_price), 0), 2) AS sum_hotel_price,    
+   -- session info
+    COUNT(DISTINCT s.session_id) AS cnt_sessions,
+    SUM(s.page_clicks) AS sum_page_clicks,    
+    MAX(s.session_start::date) - MIN(u.sign_up_date::date) AS days_active,  
+    ROUND(AVG(d.session_duration_seconds)) AS avg_session_duration_seconds,  
+    MAX(CASE WHEN s.flight_booked THEN 1 ELSE 0 END) AS has_flight_booked,
+    MAX(CASE WHEN s.hotel_booked THEN 1 ELSE 0 END)  AS has_hotel_booked,
+    ROUND(COALESCE(AVG(ad.days_advance_booking), 0)) AS avg_days_advance_booking,
+    -- discount info   
+    ROUND(COALESCE(SUM(t.flight_price * s.flight_discount_amount), 0), 2)  AS sum_flight_discount,
+    ROUND(COALESCE(SUM(t.hotel_price * s.hotel_discount_amount), 0), 2)  AS sum_hotel_discount,  
+    SUM(CASE WHEN s.flight_discount THEN 1 ELSE 0 END) AS cnt_flight_discount,
+    SUM(CASE WHEN s.hotel_discount THEN 1 ELSE 0 END) AS cnt_hotel_discount,
+    ROUND(COALESCE(AVG(s.flight_discount_amount), 0), 2) AS avg_flight_discount,
+    ROUND(COALESCE(AVG(s.hotel_discount_amount), 0), 2) AS avg_hotel_discount
+FROM sessions s
+LEFT JOIN users u ON s.user_id = u.user_id
+LEFT JOIN trip_level t on s.trip_id = t.trip_id AND s.user_id = t.user_id
+LEFT JOIN session_duration d ON s.session_id = d.session_id AND s.user_id = d.user_id
+LEFT JOIN advance_days_per_trip ad ON s.trip_id = ad.trip_id AND s.user_id = ad.user_id
+CROSS JOIN max_date md
+WHERE 
+    (md.max_session_date - u.birthdate::date) / 365 BETWEEN 18 AND 90
+    -- reduce cohort to user who registered within last 12 months
+    AND u.sign_up_date::date >= md.max_session_date - INTERVAL '12 months'   
+GROUP BY 
+    s.user_id, age, has_children, is_married
+HAVING
+    -- min 5 sessions and 30 days active
+  COUNT(s.session_id) >= 5
+  AND MAX(s.session_start::date) - MIN(u.sign_up_date::date) >= 30
+  AND (
+       -- users with no bookings
+       MAX(CASE WHEN t.trip_id IS NOT NULL THEN s.session_start::date END) IS NULL
+       -- or users who's last booking was more than 7 days ago
+       OR (MAX(s.session_start::date) - MAX(
+             CASE WHEN t.trip_id IS NOT NULL THEN s.session_start::date END)) > 7
+);

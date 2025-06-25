@@ -11,7 +11,7 @@ session_duration AS (
     FROM sessions     
 ),
 
-hotels AS (
+hotels_select AS (
     SELECT 
         trip_id,         
         CASE WHEN check_out_time::date - check_in_time::date <= 0 
@@ -21,7 +21,7 @@ hotels AS (
     FROM hotels            
 ),
 
-flights AS (
+flights_select AS (
     SELECT 
         trip_id,
         CASE WHEN return_time::date - departure_time::date <= 0 
@@ -87,8 +87,8 @@ trip_level AS (
     h.nights,
     h.hotel_price
     FROM trip_agg_with_lag t
-    LEFT JOIN flights f ON t.trip_id = f.trip_id
-    LEFT JOIN hotels h ON t.trip_id = h.trip_id
+    LEFT JOIN flights_select f ON t.trip_id = f.trip_id
+    LEFT JOIN hotels_select h ON t.trip_id = h.trip_id
 )
 SELECT 
     s.user_id,
@@ -124,7 +124,7 @@ SELECT
     ROUND(AVG(d.session_duration_seconds)) AS avg_session_duration_seconds,  
     MAX(CASE WHEN s.flight_booked THEN 1 ELSE 0 END) AS has_flight_booked,
     MAX(CASE WHEN s.hotel_booked THEN 1 ELSE 0 END)  AS has_hotel_booked,
-    ROUND(COALESCE(AVG(days_advance_booking), 0)) AS avg_days_advance_booking  
+    ROUND(COALESCE(AVG(ad.days_advance_booking), 0)) AS avg_days_advance_booking,
     -- discount info   
     ROUND(COALESCE(SUM(t.flight_price * s.flight_discount_amount), 0), 2)  AS sum_flight_discount,
     ROUND(COALESCE(SUM(t.hotel_price * s.hotel_discount_amount), 0), 2)  AS sum_hotel_discount,  
@@ -136,17 +136,18 @@ FROM sessions s
 LEFT JOIN users u ON s.user_id = u.user_id
 LEFT JOIN trip_level t on s.trip_id = t.trip_id AND s.user_id = t.user_id
 LEFT JOIN session_duration d ON s.session_id = d.session_id AND s.user_id = d.user_id
-LEFT JOIN advance_days_per_trip a ON s.trip_id = a.trip_id AND s.user_id = a.user_id
+LEFT JOIN advance_days_per_trip ad ON s.trip_id = ad.trip_id AND s.user_id = ad.user_id
 CROSS JOIN max_date md
 WHERE 
     (md.max_session_date - u.birthdate::date) / 365 BETWEEN 18 AND 90
-    -- reduce cohort to user who registered within last 1 to 12 months
-    AND u.sign_up_date::date >= md.max_session_date - INTERVAL '12 months' 
-    AND u.sign_up_date::date <= md.max_session_date - INTERVAL '1 month'   
+    -- reduce cohort to user who registered within last 12 months
+    AND u.sign_up_date::date >= md.max_session_date - INTERVAL '12 months'   
 GROUP BY 
     s.user_id, age, has_children, is_married
 HAVING
+    -- min 5 sessions and 30 days active
   COUNT(s.session_id) >= 5
+  AND MAX(s.session_start::date) - MIN(u.sign_up_date::date) >= 30
   AND (
        -- users with no bookings
        MAX(CASE WHEN t.trip_id IS NOT NULL THEN s.session_start::date END) IS NULL

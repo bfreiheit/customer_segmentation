@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 import importlib
+import importlib.resources as resources
 
 from typing import Callable
 from sqlalchemy import create_engine
@@ -11,17 +12,33 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates 
 
-from customer_segmentation.utils import queries
-importlib.reload(queries)
-
 load_dotenv(override=True)
 
-def read_from_db(query):
-    conn_str = f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/TravelTide"
+# ----------------- data import
+
+def read_from_db(model_name: str) -> pd.DataFrame:
+    """
+    Lies die SQL-Datei <model_name>.sql aus dem sql/ Verzeichnis und
+    lade die Ergebnisse aus der Datenbank in ein pandas.DataFrame.
+    """
+    # load SQL from resource 
+    sql_path = resources.files('customer_segmentation.utils').joinpath(
+        f'sql/{model_name}.sql'
+    )
+    with sql_path.open(encoding='utf-8') as f:
+        query = f.read()
+    
+    conn_str = (
+        f"postgresql://{os.environ['DB_USER']}:{os.environ['DB_PASSWORD']}@"
+        f"{os.environ['DB_HOST']}:{os.environ['DB_PORT']}/TravelTide"
+    )
     engine = create_engine(conn_str)
+   
     with engine.connect() as connection:
-        df = pd.read_sql(query, connection)
-    return df
+        return pd.read_sql(query, connection)
+
+
+# --------------------- preprocessing
 
 def get_binary_columns(df: pd.DataFrame) -> list:
     binarry_cols = []

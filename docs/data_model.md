@@ -38,7 +38,11 @@ Further investigation:
 | metric | description | formula | date type |
 | --- | --- | --- |  --- |  
 | total_sales | total value of user: distinguish high and low-value user | SUM(hotel + flight cost) | float |  
+ 
 
+ **travel-based metrics**
+
+ flight_booked and hotel_booked have been transformed to boolean as the count does not align with cnt_trips.
 
 
 | metric | description | formula | date type | 

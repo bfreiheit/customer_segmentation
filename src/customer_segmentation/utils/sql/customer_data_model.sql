@@ -82,7 +82,7 @@ SELECT
     ROUND(COALESCE(SUM(CASE WHEN t.trip_id IS NOT NULL THEN 1 ELSE 0 END), 0)) AS cnt_trips, 
     ROUND(COALESCE(SUM(CASE WHEN t.trip_id IS NOT NULL THEN t.is_cancelled ELSE 0 END), 0)) AS cnt_cancellations,  
     ROUND(COALESCE(AVG(t.trip_date - t.prev_trip_date), 0)) as avg_diff_trip_days,
-    COALESCE(MAX(s.session_start::date) - MAX(CASE WHEN t.trip_date IS NOT NULL THEN t.trip_date END), 0) AS last_trip_age,  
+    COALESCE(MAX(s.session_start::date) - MAX(CASE WHEN t.trip_date IS NOT NULL THEN t.trip_date END), 0) AS days_last_trip,  
     -- flight info     
     ROUND(COALESCE(SUM(t.travel_days), 0)) AS sum_flight_travel_days,   
     ROUND(COALESCE(SUM(t.flight_price), 0), 2) AS sum_flight_price, 
@@ -101,9 +101,11 @@ SELECT
     ROUND(COALESCE(SUM(t.hotel_price), 0), 2) AS sum_hotel_price,    
    -- session info
     COUNT(DISTINCT s.session_id) AS cnt_sessions,
-    SUM(s.page_clicks) AS page_clicks,    
-    MAX(s.session_start::date) - MIN(u.sign_up_date::date) AS days_active_age,  
-    ROUND(AVG(d.session_duration_seconds)) AS avg_session_duration_seconds,    
+    SUM(s.page_clicks) AS sum_page_clicks,    
+    MAX(s.session_start::date) - MIN(u.sign_up_date::date) AS days_active,  
+    ROUND(AVG(d.session_duration_seconds)) AS avg_session_duration_seconds,  
+    MAX(CASE WHEN s.flight_booked THEN 1 ELSE 0 END) AS has_flight_booked,
+    MAX(CASE WHEN s.hotel_booked THEN 1 ELSE 0 END)  AS has_hotel_booked,  
     -- discount info   
     ROUND(COALESCE(SUM(t.flight_price * s.flight_discount_amount), 0), 2)  AS sum_flight_discount,
     ROUND(COALESCE(SUM(t.hotel_price * s.hotel_discount_amount), 0), 2)  AS sum_hotel_discount,  

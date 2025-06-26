@@ -62,22 +62,19 @@ def normalize_per_month(df, cols, time_column = 'month_active'):
     return df
 
 # ------------------- plot functions 
-#TODO: bug in size
+
 def plot_time_series(df: pd.DataFrame, x: str, y: list, n_cols = 2) -> None:
    
-    size = [(i, j) for i in range(len(y)-1) for j in range(len(y)-1) if j <= 1 and i <= 1]    
-    rows = len(size) // n_cols
+    n_rows = (len(y) + n_cols - 1) // n_cols
 
-    _, axes = plt.subplots(rows, n_cols, figsize=(len(size)**2, len(size)+2))  
-  
-    for s, col in zip(size, y):
-        i, j = s      
-        sns.lineplot(data=df, x=x, y=col, ax=axes[i, j])
-        axes[i, j].set_title(f'{col} | {x}')
-        axes[i, j].xaxis.set_major_locator(mdates.MonthLocator(interval=2)) 
-        axes[i, j].xaxis.set_major_formatter(mdates.DateFormatter('%y-%m'))
-        axes[i, j].set_xlabel("")
-       
+    _, axes = plt.subplots(n_rows, n_cols, figsize=(len(y) + 10, len(y) + 8)) 
+    axes = axes.flatten()
+
+    for i, col_name in enumerate(y):
+            sns.lineplot(data = df, x = x, y = col_name, ax = axes[i])
+            axes[i].set_title(f"{col_name}")
+            axes[i].set_xlabel("")
+            axes[i].set_ylabel("")
     plt.tight_layout()
     plt.show()
 

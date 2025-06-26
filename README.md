@@ -13,7 +13,9 @@ customer_segmentation/
 ├── README.md
 ├── data
 ├── docs
-│   └── customer_segmentation.md
+│   ├── customer_segmentation.md
+│   ├── data_model.md
+│   └── preprocessing.md
 ├── notebooks
 │   ├── EDA.ipynb
 │   ├── RFM.ipynb

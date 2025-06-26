@@ -120,7 +120,7 @@ SELECT
     ROUND(COALESCE(AVG(t.nights), 0)) AS avg_hotel_nights,     
     ROUND(COALESCE(SUM(t.hotel_price), 0), 2) AS sum_hotel_price,    
    -- session info
-    MIN(u.sign_up_date::date) AS min_signup_date,
+    MIN(u.sign_up_date::date) AS min_signup_date,    
     COUNT(DISTINCT s.session_id) AS cnt_sessions,
     SUM(s.page_clicks) AS sum_page_clicks,    
     MAX(s.session_start::date) - MIN(u.sign_up_date::date) AS days_active,  

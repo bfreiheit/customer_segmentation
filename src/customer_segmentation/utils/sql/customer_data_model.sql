@@ -18,7 +18,7 @@ hotels_select AS (
         THEN 1 ELSE check_out_time::date - check_in_time::date 
         END as nights,
 
-        hotel_per_room_usd * rooms * nights AS hotel_price,
+        hotel_per_room_usd AS hotel_price,
         check_in_time::date AS check_in_date,
         rooms       
     FROM hotels            
@@ -38,6 +38,7 @@ flights_select AS (
         END AS flight_price, 
 
         seats,
+        checked_bags,
         departure_time::date AS departure_date,
         destination_airport_lat,
         destination_airport_lon
@@ -77,10 +78,11 @@ trip_level AS (
     f.destination_airport_lat,
     f.destination_airport_lon, 
     f.seats,
+    f.checked_bags,
     --f.departure_date, 
     h.nights,
     h.rooms,
-    h.hotel_price,
+    h.hotel_price * h.rooms * h.nights AS hotel_price,
     --h.check_in_date,
     COALESCE(f.flight_travel_days, h.nights) AS travel_days,
     COALESCE(f.departure_date, h.check_in_date) AS trip_start_date
@@ -102,7 +104,8 @@ SELECT
     ROUND(COALESCE(AVG(t.trip_start_date - t.trip_date), 0)) AS avg_days_advance_booking,
     ROUND(COALESCE(AVG(t.travel_days), 0)) AS avg_travel_days,  
     -- flight info  
-    ROUND(COALESCE(AVG(t.seats), 0)) AS avg_seats,   
+    ROUND(COALESCE(AVG(t.seats), 0)) AS avg_seats,
+    ROUND(COALESCE(AVG(t.checked_bags), 0)) AS avg_checked_bags,   
     ROUND(COALESCE(AVG(t.flight_travel_days), 0)) AS avg_flight_travel_days,   
     ROUND(COALESCE(SUM(t.flight_price), 0), 2) AS sum_flight_price, 
     ROUND(COALESCE(AVG(6371 * acos(

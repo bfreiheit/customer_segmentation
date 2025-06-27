@@ -1,6 +1,5 @@
 import os
 from dotenv import load_dotenv
-import importlib
 import importlib.resources as resources
 
 from typing import Callable
@@ -10,35 +9,36 @@ import numpy as np
 
 import seaborn as sns
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates 
 
 load_dotenv(override=True)
 
 # ----------------- data import
 
+
 def read_from_db(model_name: str) -> pd.DataFrame:
     """
-    load the sql file <model_name>.sql from sql/ directory 
+    load the sql file <model_name>.sql from sql/ directory
     and load data into a pandas.DataFrame.
     """
-    # load SQL from resource 
-    sql_path = resources.files('customer_segmentation.utils').joinpath(
-        f'sql/{model_name}.sql'
+    # load SQL from resource
+    sql_path = resources.files("customer_segmentation.utils").joinpath(
+        f"sql/{model_name}.sql"
     )
-    with sql_path.open(encoding='utf-8') as f:
+    with sql_path.open(encoding="utf-8") as f:
         query = f.read()
-    
+
     conn_str = (
         f"postgresql://{os.environ['DB_USER']}:{os.environ['DB_PASSWORD']}@"
         f"{os.environ['DB_HOST']}:{os.environ['DB_PORT']}/TravelTide"
     )
     engine = create_engine(conn_str)
-   
+
     with engine.connect() as connection:
         return pd.read_sql(query, connection)
 
 
 # --------------------- preprocessing
+
 
 def get_binary_columns(df: pd.DataFrame) -> list:
     binarry_cols = []
@@ -46,6 +46,7 @@ def get_binary_columns(df: pd.DataFrame) -> list:
         if df[col].nunique() == 2 and set(df[col].unique()) == {0, 1}:
             binarry_cols.append(col)
     return binarry_cols
+
 
 def find_outliers(df, column):
     mean = df[column].mean()
@@ -55,38 +56,92 @@ def find_outliers(df, column):
     new_df = df[(df[column] < upper) & (df[column] > lower)]
     return new_df
 
-def normalize_per_month(df, cols, time_column = 'month_active'):
+
+def normalize_per_month(df, cols, time_column="month_active"):
     for col in cols:
         new_col = f"{col}_per_month"
         df[new_col] = df[col] / df[time_column].replace(0, np.nan)
     return df
 
-# ------------------- plot functions 
 
-def plot_time_series(df: pd.DataFrame, x: str, y: list, n_cols = 2) -> None:
-   
+def missing_data(df):
+    total = df.isnull().sum().sort_values(ascending=False)
+    Percentage = (df.isnull().sum() / df.isnull().count() * 100).sort_values(
+        ascending=False
+    )
+    return pd.concat([total, Percentage], axis=1, keys=["Total", "Percentage"])
+
+
+def reduce_memory_usage(df, verbose=True):
+    numerics = ["int8", "int16", "int32", "int64", "float16", "float32", "float64"]
+    start_mem = df.memory_usage().sum() / 1024**2
+    for col in df.columns:
+        col_type = df[col].dtypes
+        if col_type in numerics:
+            c_min = df[col].min()
+            c_max = df[col].max()
+            if str(col_type)[:3] == "int":
+                if c_min > np.iinfo(np.int8).min and c_max < np.iinfo(np.int8).max:
+                    df[col] = df[col].astype(np.int8)
+                elif c_min > np.iinfo(np.int16).min and c_max < np.iinfo(np.int16).max:
+                    df[col] = df[col].astype(np.int16)
+                elif c_min > np.iinfo(np.int32).min and c_max < np.iinfo(np.int32).max:
+                    df[col] = df[col].astype(np.int32)
+                elif c_min > np.iinfo(np.int64).min and c_max < np.iinfo(np.int64).max:
+                    df[col] = df[col].astype(np.int64)
+            else:
+                if (
+                    c_min > np.finfo(np.float16).min
+                    and c_max < np.finfo(np.float16).max
+                ):
+                    df[col] = df[col].astype(np.float16)
+                elif (
+                    c_min > np.finfo(np.float32).min
+                    and c_max < np.finfo(np.float32).max
+                ):
+                    df[col] = df[col].astype(np.float32)
+                else:
+                    df[col] = df[col].astype(np.float64)
+    end_mem = df.memory_usage().sum() / 1024**2
+    if verbose:
+        print(
+            "Mem. usage decreased to {:.2f} Mb ({:.1f}% reduction)".format(
+                end_mem, 100 * (start_mem - end_mem) / start_mem
+            )
+        )
+    return df
+
+
+# ------------------- plot functions
+
+
+def plot_time_series(df: pd.DataFrame, x: str, y: list, n_cols=2) -> None:
+
     n_rows = (len(y) + n_cols - 1) // n_cols
 
-    _, axes = plt.subplots(n_rows, n_cols, figsize=(len(y) + 10, len(y) + 8)) 
+    _, axes = plt.subplots(n_rows, n_cols, figsize=(len(y) + 10, len(y) + 8))
     axes = axes.flatten()
 
     for i, col_name in enumerate(y):
-            sns.lineplot(data = df, x = x, y = col_name, ax = axes[i])
-            axes[i].set_title(f"{col_name}")
-            axes[i].set_xlabel("")
-            axes[i].set_ylabel("")
+        sns.lineplot(data=df, x=x, y=col_name, ax=axes[i])
+        axes[i].set_title(f"{col_name}")
+        axes[i].set_xlabel("")
+        axes[i].set_ylabel("")
     plt.tight_layout()
     plt.show()
 
-def plot_univariate_series(df: pd.DataFrame, metrics: list, n_cols: int = 4, plot_type: Callable = sns.boxplot) -> None:
+
+def plot_univariate_series(
+    df: pd.DataFrame, metrics: list, n_cols: int = 4, plot_type: Callable = sns.boxplot
+) -> None:
 
     n_rows = (len(metrics) + n_cols - 1) // n_cols
 
-    fig, axes = plt.subplots(n_rows, n_cols, figsize = (13, n_rows * 2))
-    axes = axes.flatten() 
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(13, n_rows * 2))
+    axes = axes.flatten()
     for i, col_name in enumerate(metrics):
         df_filtered = df[df[col_name] > 0]
-        plot_type(data = df_filtered, x = col_name, ax = axes[i])
+        plot_type(data=df_filtered, x=col_name, ax=axes[i])
         axes[i].set_title(f"{col_name}")
         axes[i].set_xlabel("")
         axes[i].set_ylabel("")
@@ -95,14 +150,20 @@ def plot_univariate_series(df: pd.DataFrame, metrics: list, n_cols: int = 4, plo
     plt.show()
 
 
-def plot_bivariate_series(df: pd.DataFrame, category:str, metrics: list, n_cols: int = 4, plot_type: Callable = sns.barplot) -> None:
+def plot_bivariate_series(
+    df: pd.DataFrame,
+    category: str,
+    metrics: list,
+    n_cols: int = 4,
+    plot_type: Callable = sns.barplot,
+) -> None:
 
     n_rows = (len(metrics) + n_cols - 1) // n_cols
 
-    _, axes = plt.subplots(n_rows, n_cols, figsize = (13, n_rows * 2))
-    axes = axes.flatten() 
+    _, axes = plt.subplots(n_rows, n_cols, figsize=(13, n_rows * 2))
+    axes = axes.flatten()
     for i, col_name in enumerate(metrics):
-        plot_type(data = df, x = category, y = col_name, ax = axes[i])
+        plot_type(data=df, x=category, y=col_name, ax=axes[i])
         axes[i].set_title(f"{col_name}")
         axes[i].set_xlabel("")
         axes[i].set_ylabel("")

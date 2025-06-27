@@ -1,7 +1,7 @@
 jupyter
 ipykernel
 black
+black[jupyter]
 flake8
 matplotlib-inline
-python-dotenv
 pytest

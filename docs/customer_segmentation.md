@@ -63,7 +63,7 @@ Füge hier auch Plots ein (z. B. Streudiagramm oder Cluster-Visualisierungen) mi
 ## References
 - [KMeans-Dokumentation (scikit-learn)](https://scikit-learn.org/stable/modules/clustering.html#k-means)
 - [Customer Segmentation with Machine Learning: Targeting the Right Audience](https://medium.com/@byanalytixlabs/customer-segmentation-with-machine-learning-targeting-the-right-audience-656f5d2ce8f8)
-- [Projekt-Notebook](../notebooks/Segmentation.ipynb)
+- [Project-Notebook](../notebooks/Segmentation.ipynb)
 ---
 
 *(updated on: `2025-06-22`)*  

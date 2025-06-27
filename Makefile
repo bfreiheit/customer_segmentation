@@ -1,4 +1,4 @@
-VENV_DIR = .venv
+VENV_DIR := .venv
 PYTHON = $(VENV_DIR)/bin/python
 PIP = $(VENV_DIR)/bin/pip
 
@@ -40,9 +40,9 @@ check:
 
 help:
 	@echo "available targets:"
-	@echo "  make venv       → erstellt die venv"
+	@echo "  make venv       → creates venv"
 	@echo "  make install    → installs project from pyproject.toml"
-	@echo "  make install-dev → installiert Projekt und dev-Abhängigkeiten"
+	@echo "  make install-dev → installs projects and dev-dependencies"
 	@echo "  make update     → update project/dependencies"
 	@echo "  make notebook   → starts Jupyter Notebook in ./notebooks"
 	@echo "  make clean      → deletes __pycache__ directories"

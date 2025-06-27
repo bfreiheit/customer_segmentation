@@ -71,7 +71,6 @@ To filter the data based on the potential perks, the user cohort has been determ
 | sum_flight_price | Total flight spending | SUM(t.flight_price) | float |
 | sum_hotel_price | Total hotel spending | SUM(t.hotel_price) | float |
 | avg_booking_value | Average booking value per trip | total_booking_value / cnt_trips | float |
-| customer_value_per_month | Average booking value per active month | total_booking_value / month_active | float |
 
 **price sensitivity & discounts**
 | metric | description | formula | data type |

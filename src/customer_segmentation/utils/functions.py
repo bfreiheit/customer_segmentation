@@ -47,70 +47,15 @@ def get_binary_columns(df: pd.DataFrame) -> list:
             binarry_cols.append(col)
     return binarry_cols
 
-
-def find_outliers(df, column):
-    mean = df[column].mean()
-    std = df[column].std()
-    cut_off = std * 3
-    lower, upper = mean - cut_off, mean + cut_off
-    new_df = df[(df[column] < upper) & (df[column] > lower)]
-    return new_df
-
-
-def normalize_per_month(df, cols, time_column="month_active"):
-    for col in cols:
-        new_col = f"{col}_per_month"
-        df[new_col] = df[col] / df[time_column].replace(0, np.nan)
-    return df
-
-
 def missing_data(df):
     total = df.isnull().sum().sort_values(ascending=False)
+    total = total[total.apply(lambda x: x > 0)]
+
     Percentage = (df.isnull().sum() / df.isnull().count() * 100).sort_values(
         ascending=False
     )
+    Percentage = Percentage[Percentage.apply(lambda x: x > 0.00)]
     return pd.concat([total, Percentage], axis=1, keys=["Total", "Percentage"])
-
-
-def reduce_memory_usage(df, verbose=True):
-    numerics = ["int8", "int16", "int32", "int64", "float16", "float32", "float64"]
-    start_mem = df.memory_usage().sum() / 1024**2
-    for col in df.columns:
-        col_type = df[col].dtypes
-        if col_type in numerics:
-            c_min = df[col].min()
-            c_max = df[col].max()
-            if str(col_type)[:3] == "int":
-                if c_min > np.iinfo(np.int8).min and c_max < np.iinfo(np.int8).max:
-                    df[col] = df[col].astype(np.int8)
-                elif c_min > np.iinfo(np.int16).min and c_max < np.iinfo(np.int16).max:
-                    df[col] = df[col].astype(np.int16)
-                elif c_min > np.iinfo(np.int32).min and c_max < np.iinfo(np.int32).max:
-                    df[col] = df[col].astype(np.int32)
-                elif c_min > np.iinfo(np.int64).min and c_max < np.iinfo(np.int64).max:
-                    df[col] = df[col].astype(np.int64)
-            else:
-                if (
-                    c_min > np.finfo(np.float16).min
-                    and c_max < np.finfo(np.float16).max
-                ):
-                    df[col] = df[col].astype(np.float16)
-                elif (
-                    c_min > np.finfo(np.float32).min
-                    and c_max < np.finfo(np.float32).max
-                ):
-                    df[col] = df[col].astype(np.float32)
-                else:
-                    df[col] = df[col].astype(np.float64)
-    end_mem = df.memory_usage().sum() / 1024**2
-    if verbose:
-        print(
-            "Mem. usage decreased to {:.2f} Mb ({:.1f}% reduction)".format(
-                end_mem, 100 * (start_mem - end_mem) / start_mem
-            )
-        )
-    return df
-
 
 # ------------------- plot functions
 

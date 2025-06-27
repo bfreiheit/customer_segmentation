@@ -1,6 +1,14 @@
-# customer_segmentation
+# Customer Segmentation
+---
 
-This repository contains jupyter notebooks analyzing customer data.
+This repository contains jupyter notebooks analyzing customer data:
+- [EDA-Notebook](../notebooks/EDA.ipynb)
+- [Segmentation-Notebook](../notebooks/Segmentation.ipynb)
+- [RFM-Notebook](../notebooks/RFM.ipynb)
+
+In the docs/ folder the data model and analysis is explained:
+[Data Model](../docs/data_model.md)
+[Segmentation Documentation](../docs/customer_segmentation.md)
 
 src/customer_segmentation/ contains source code.
 
@@ -15,7 +23,6 @@ customer_segmentation/
 ├── docs
 │   ├── customer_segmentation.md
 │   ├── data_model.md
-│   └── preprocessing.md
 ├── notebooks
 │   ├── EDA.ipynb
 │   ├── RFM.ipynb

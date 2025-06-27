@@ -91,8 +91,8 @@ trip_level AS (
     LEFT JOIN hotels_select h ON t.trip_id = h.trip_id
 )
 SELECT 
-    s.user_id,
     -- user info
+    s.user_id,    
     (md.max_session_date - u.birthdate::date) / 365 AS age,    
     CASE WHEN u.has_children THEN 1 ELSE 0 END AS has_children,
     CASE WHEN u.married THEN 1 ELSE 0 END AS is_married,
@@ -128,8 +128,8 @@ SELECT
     SUM(s.page_clicks) AS sum_page_clicks,    
     MAX(s.session_start::date) - MIN(u.sign_up_date::date) AS days_active,  
     ROUND(AVG(d.session_duration_seconds)) AS avg_session_duration_seconds,  
-    MAX(CASE WHEN s.flight_booked THEN 1 ELSE 0 END) AS has_flight_booked,
-    MAX(CASE WHEN s.hotel_booked THEN 1 ELSE 0 END)  AS has_hotel_booked,    
+    SUM(CASE WHEN s.flight_booked THEN 1 ELSE 0 END) AS flight_booked,
+    SUM(CASE WHEN s.hotel_booked THEN 1 ELSE 0 END)  AS hotel_booked,    
     -- discount info   
     ROUND(COALESCE(SUM(t.flight_price * s.flight_discount_amount), 0), 2)  AS sum_flight_discount,
     ROUND(COALESCE(SUM(t.hotel_price * s.hotel_discount_amount), 0), 2)  AS sum_hotel_discount,  

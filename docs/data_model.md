@@ -6,18 +6,26 @@
 | age | Age of the user in years | (md.max_session_date - u.birthdate) / 365 | float |
 | has_children | Indicator if the user has children (1 = yes, 0 = no) | CASE WHEN u.has_children THEN 1 ELSE 0 END | int |
 | is_married | Indicator if the user is married (1 = yes, 0 = no) | CASE WHEN u.married THEN 1 ELSE 0 END | int |
+
+**loyality**
+| metric | description | formula | data type |
+| --- | --- | --- | --- |
 | min_signup_date | User's earliest signup date | MIN(u.sign_up_date) | date |
 | days_active | Active days (from signup to last session) | MAX(s.session_start) - MIN(u.sign_up_date) | int |
 | month_active | Active period in months | days_active / 30 | float |
-| has_flight_booked | Indicator if a flight was ever booked | MAX(CASE WHEN s.flight_booked THEN 1 ELSE 0 END) | int |
-| has_hotel_booked | Indicator if a hotel was ever booked | MAX(CASE WHEN s.hotel_booked THEN 1 ELSE 0 END) | int |
 
-**travel frequency & engagement**
+**booking frequency**
 | metric | description | formula | data type |
 | --- | --- | --- | --- |
 | cnt_trips | Total number of trips | SUM(CASE WHEN t.trip_id IS NOT NULL THEN 1 ELSE 0 END) | int |
-| days_last_trip | Days since last trip | MAX(s.session_start) - MAX(t.trip_date) | int |
 | trips_per_month | Average number of trips per active month | cnt_trips / month_active | float |
+| flight_booked | Counts of flights booked | SUM(CASE WHEN s.flight_booked THEN 1 ELSE 0 END) | int |
+| hotel_booked | Counts of hotels booked | SUM(CASE WHEN s.hotel_booked THEN 1 ELSE 0 END) | int |
+
+**engagement**
+| metric | description | formula | data type |
+| --- | --- | --- | --- |
+| days_last_trip | Days since last trip | MAX(s.session_start) - MAX(t.trip_date) | int |
 | cnt_sessions | Total number of sessions | COUNT(DISTINCT s.session_id) | int |
 | sum_page_clicks | Total number of page clicks | SUM(s.page_clicks) | int |
 | sessions_per_month | Average number of sessions per active month | cnt_sessions / month_active | float |
@@ -58,6 +66,8 @@
 | avg_hotel_discount | Average hotel discount rate | AVG(s.hotel_discount_amount) | float |
 | total_discount_rate | Total discount rate on all bookings | (sum_flight_discount + sum_hotel_discount) / total_booking_value | float |
 | discount_per_km | Flight discount per km traveled | sum_flight_discount / sum_distance_km | float |
+| flight_discount_rate | Ratio of discounts per flight bookings | cnt_flight_discount / flight_booked | float |  
+| hotel_discount_rate | Ratio of discounts per hotel bookings | cnt_hotel_discount / hotel_booked | float |
 
 **cancellation behaviour**
 | metric | description | formula | data type |

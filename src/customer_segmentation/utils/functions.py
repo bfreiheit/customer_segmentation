@@ -10,6 +10,9 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+
 load_dotenv(override=True)
 
 # ----------------- data import
@@ -47,6 +50,7 @@ def get_binary_columns(df: pd.DataFrame) -> list:
             binarry_cols.append(col)
     return binarry_cols
 
+
 def missing_data(df):
     total = df.isnull().sum().sort_values(ascending=False)
     total = total[total.apply(lambda x: x > 0)]
@@ -56,6 +60,15 @@ def missing_data(df):
     )
     Percentage = Percentage[Percentage.apply(lambda x: x > 0.00)]
     return pd.concat([total, Percentage], axis=1, keys=["Total", "Percentage"])
+
+def PCA_pipeline(df: pd.DataFrame, features: list, score_name: str) -> pd.DataFrame:
+    # 1. standardize
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(df[features])
+    # 2. apply PCA to subset
+    pca = PCA(n_components=1)
+    df[score_name] = pca.fit_transform(X_scaled)
+    return df
 
 # ------------------- plot functions
 

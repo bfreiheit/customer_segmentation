@@ -38,7 +38,6 @@ To filter the data based on the potential perks, the user cohort has been determ
 **booking frequency**
 | metric | description | formula | data type |
 | --- | --- | --- | --- |
-| cnt_trips | Total number of trips | SUM(CASE WHEN t.trip_id IS NOT NULL THEN 1 ELSE 0 END) | int |
 | trips_per_month | Average number of trips per active month | cnt_trips / month_active | float |
 | flight_booked | Counts of flights booked | SUM(CASE WHEN s.flight_booked THEN 1 ELSE 0 END) | int |
 | hotel_booked | Counts of hotels booked | SUM(CASE WHEN s.hotel_booked THEN 1 ELSE 0 END) | int |
@@ -47,8 +46,6 @@ To filter the data based on the potential perks, the user cohort has been determ
 | metric | description | formula | data type |
 | --- | --- | --- | --- |
 | days_last_trip | Days since last trip | MAX(s.session_start) - MAX(t.trip_date) | int |
-| cnt_sessions | Total number of sessions | COUNT(DISTINCT s.session_id) | int |
-| sum_page_clicks | Total number of page clicks | SUM(s.page_clicks) | int |
 | sessions_per_month | Average number of sessions per active month | cnt_sessions / month_active | float |
 | avg_session_duration_seconds | Average session duration in seconds | AVG(d.session_duration_seconds) | float |
 
@@ -68,17 +65,11 @@ To filter the data based on the potential perks, the user cohort has been determ
 **spending & value**
 | metric | description | formula | data type |
 | --- | --- | --- | --- |
-| sum_flight_price | Total flight spending | SUM(t.flight_price) | float |
-| sum_hotel_price | Total hotel spending | SUM(t.hotel_price) | float |
 | avg_booking_value | Average booking value per trip | total_booking_value / cnt_trips | float |
 
 **price sensitivity & discounts**
 | metric | description | formula | data type |
 | --- | --- | --- | --- |
-| sum_flight_discount | Total amount of flight discounts received | SUM(t.flight_price * s.flight_discount_amount) | float |
-| sum_hotel_discount | Total amount of hotel discounts received | SUM(t.hotel_price * s.hotel_discount_amount) | float |
-| cnt_flight_discount | Count of sessions with flight discount applied | SUM(CASE WHEN s.flight_discount THEN 1 ELSE 0 END) | int |
-| cnt_hotel_discount | Count of sessions with hotel discount applied | SUM(CASE WHEN s.hotel_discount THEN 1 ELSE 0 END) | int |
 | avg_flight_discount | Average flight discount rate | AVG(s.flight_discount_amount) | float |
 | avg_hotel_discount | Average hotel discount rate | AVG(s.hotel_discount_amount) | float |
 | total_discount_rate | Total discount rate on all bookings | (sum_flight_discount + sum_hotel_discount) / total_booking_value | float |
@@ -89,7 +80,6 @@ To filter the data based on the potential perks, the user cohort has been determ
 **cancellation behaviour**
 | metric | description | formula | data type |
 | --- | --- | --- | --- |
-| cnt_cancellations | Total number of canceled trips | SUM(CASE WHEN t.trip_id IS NOT NULL THEN t.is_cancelled ELSE 0 END) | int |
 | cancellation_rate | Share of trips that were cancelled | cnt_cancellations / cnt_trips | float |
 
 ## Methods

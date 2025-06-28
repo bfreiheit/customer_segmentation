@@ -11,7 +11,9 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import FunctionTransformer, StandardScaler
+from sklearn.compose import ColumnTransformer
 
 load_dotenv(override=True)
 
@@ -62,12 +64,29 @@ def missing_data(df):
     return pd.concat([total, Percentage], axis=1, keys=["Total", "Percentage"])
 
 def PCA_pipeline(df: pd.DataFrame, features: list, score_name: str) -> pd.DataFrame:
-    # 1. standardize
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(df[features])
-    # 2. apply PCA to subset
+    # 1. check skewness
+    skewness = df[features].skew(numeric_only=True)
+    highly_skewed = skewness[np.abs(skewness) > 0.75].index.to_list()
+    lowly_skewed = list(set(features) - set(highly_skewed))
+
+    # 2. define transformations
+    transformers = ColumnTransformer(transformers=[
+        ("log+scale", make_pipeline(
+            FunctionTransformer(np.log1p, feature_names_out="one-to-one"),
+            StandardScaler()
+        ), highly_skewed),
+        ("scale", StandardScaler(), lowly_skewed)
+    ])
+
+    # 3. transform data
+    X_transformed = transformers.fit_transform(df[features])
+
+    # 4. PCA
     pca = PCA(n_components=1)
-    df[score_name] = pca.fit_transform(X_scaled)
+    score = pca.fit_transform(X_transformed)
+
+    # 5. attach score to df
+    df[score_name] = score
     return df
 
 # ------------------- plot functions
@@ -90,16 +109,16 @@ def plot_time_series(df: pd.DataFrame, x: str, y: list, n_cols=2) -> None:
 
 
 def plot_univariate_series(
-    df: pd.DataFrame, metrics: list, n_cols: int = 4, plot_type: Callable = sns.boxplot
+    df: pd.DataFrame, metrics: list, n_cols: int = 4, set_kde: bool = True, set_bins: int = 20, plot_type: Callable = sns.boxplot
 ) -> None:
 
     n_rows = (len(metrics) + n_cols - 1) // n_cols
 
-    fig, axes = plt.subplots(n_rows, n_cols, figsize=(13, n_rows * 2))
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(16, n_rows * 2))
     axes = axes.flatten()
     for i, col_name in enumerate(metrics):
         df_filtered = df[df[col_name] > 0]
-        plot_type(data=df_filtered, x=col_name, ax=axes[i])
+        plot_type(data=df_filtered, x=col_name, ax=axes[i], kde=set_kde, bins=set_bins)
         axes[i].set_title(f"{col_name}")
         axes[i].set_xlabel("")
         axes[i].set_ylabel("")

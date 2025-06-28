@@ -54,6 +54,8 @@
 | total_booking_value | Total booking value (hotel + flight) | sum_hotel_price + sum_flight_price | float |
 | avg_booking_value | Average booking value per trip | total_booking_value / cnt_trips | float |
 | customer_value_per_month | Average booking value per active month | total_booking_value / month_active | float |
+| flight_booking_value | Average flight booking value | sum_flight_price / total_booking_value |  
+| hotel_booking_value | Average hotel booking value | sum_hotel_price / total_booking_value |  
 
 **price sensitivity & discounts**
 | metric | description | formula | data type |

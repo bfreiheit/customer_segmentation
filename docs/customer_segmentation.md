@@ -66,6 +66,8 @@ To filter the data based on the potential perks, the user cohort has been determ
 | metric | description | formula | data type |
 | --- | --- | --- | --- |
 | avg_booking_value | Average booking value per trip | total_booking_value / cnt_trips | float |
+| flight_booking_value | Average flight booking value | sum_flight_price / total_booking_value |  
+| hotel_booking_value | Average hotel booking value | sum_hotel_price / total_booking_value |  
 
 **price sensitivity & discounts**
 | metric | description | formula | data type |

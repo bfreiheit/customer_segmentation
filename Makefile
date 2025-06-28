@@ -31,7 +31,8 @@ format:
 	$(VENV_DIR)/bin/black src notebooks tests
 
 isort:
-	$(VENV_DIR)/bin/isort src notebooks tests
+	$(VENV_DIR)/bin/isort src tests
+	$(VENV_DIR)/bin/nbqa isort notebooks
 
 check:
 	make lint

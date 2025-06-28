@@ -1,19 +1,17 @@
-import os
-from dotenv import load_dotenv
 import importlib.resources as resources
-
+import os
 from typing import Callable
-from sqlalchemy import create_engine
-import pandas as pd
-import numpy as np
 
-import seaborn as sns
 import matplotlib.pyplot as plt
-
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from dotenv import load_dotenv
+from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import PCA
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import FunctionTransformer, StandardScaler
-from sklearn.compose import ColumnTransformer
+from sqlalchemy import create_engine
 
 load_dotenv(override=True)
 

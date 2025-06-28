@@ -1,8 +1,7 @@
 import unittest
 
+import matplotlib
 import pandas as pd
-import matplotlib
-import matplotlib
 
 from customer_segmentation.utils import functions
 

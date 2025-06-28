@@ -63,6 +63,7 @@ def missing_data(df):
     Percentage = Percentage[Percentage.apply(lambda x: x > 0.00)]
     return pd.concat([total, Percentage], axis=1, keys=["Total", "Percentage"])
 
+
 def PCA_pipeline(df: pd.DataFrame, features: list, score_name: str) -> pd.DataFrame:
     # 1. check skewness
     skewness = df[features].skew(numeric_only=True)
@@ -70,13 +71,19 @@ def PCA_pipeline(df: pd.DataFrame, features: list, score_name: str) -> pd.DataFr
     lowly_skewed = list(set(features) - set(highly_skewed))
 
     # 2. define transformations
-    transformers = ColumnTransformer(transformers=[
-        ("log+scale", make_pipeline(
-            FunctionTransformer(np.log1p, feature_names_out="one-to-one"),
-            StandardScaler()
-        ), highly_skewed),
-        ("scale", StandardScaler(), lowly_skewed)
-    ])
+    transformers = ColumnTransformer(
+        transformers=[
+            (
+                "log+scale",
+                make_pipeline(
+                    FunctionTransformer(np.log1p, feature_names_out="one-to-one"),
+                    StandardScaler(),
+                ),
+                highly_skewed,
+            ),
+            ("scale", StandardScaler(), lowly_skewed),
+        ]
+    )
 
     # 3. transform data
     X_transformed = transformers.fit_transform(df[features])
@@ -88,6 +95,7 @@ def PCA_pipeline(df: pd.DataFrame, features: list, score_name: str) -> pd.DataFr
     # 5. attach score to df
     df[score_name] = score
     return df
+
 
 # ------------------- plot functions
 
@@ -109,7 +117,12 @@ def plot_time_series(df: pd.DataFrame, x: str, y: list, n_cols=2) -> None:
 
 
 def plot_univariate_series(
-    df: pd.DataFrame, metrics: list, n_cols: int = 4, set_kde: bool = True, set_bins: int = 20, plot_type: Callable = sns.boxplot
+    df: pd.DataFrame,
+    metrics: list,
+    n_cols: int = 4,
+    set_kde: bool = True,
+    set_bins: int = 20,
+    plot_type: Callable = sns.boxplot,
 ) -> None:
 
     n_rows = (len(metrics) + n_cols - 1) // n_cols

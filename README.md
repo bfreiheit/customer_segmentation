@@ -24,6 +24,8 @@ customer_segmentation/
 ├── docs
 │   ├── customer_segmentation.md
 │   ├── data_model.md
+├── images
+│   └── segmentation_table.png
 ├── notebooks
 │   ├── EDA.ipynb
 │   ├── RFM.ipynb

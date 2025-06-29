@@ -20,58 +20,18 @@ To filter the data based on the potential perks, the user cohort has been determ
 
 ## Data
 - **Source**: TravelTide postgres database
-- **Variables**: Most important attributes are:
+- **Features**:  
 
-**user demographics & status**
-| metric | description | formula | data type |
-| --- | --- | --- | --- |
-| age | Age of the user in years | (md.max_session_date - u.birthdate) / 365 | float |
-| has_children | Indicator if the user has children (1 = yes, 0 = no) | CASE WHEN u.has_children THEN 1 ELSE 0 END | int |
-| is_married | Indicator if the user is married (1 = yes, 0 = no) | CASE WHEN u.married THEN 1 ELSE 0 END | int |
+| Feature Group            | Features                                                                 |
+|--------------------------|---------------------------------------------------------------------------|
+| flight_discount_score    | - avg_flight_discount<br>- flight_discount_rate<br>- discount_per_km     |
+| hotel_discount_score     | - avg_hotel_discount<br>- hotel_discount_rate                            |
+| user_score               | - age<br>- is_married<br>- has_children                                   |
+| engagement_score         | - days_last_trip<br>- sessions_per_month<br>- avg_session_duration_seconds<br>- page_click_per_session |
+| flight_travel_score      | - avg_flight_travel_days<br>- avg_seats<br>- avg_checked_bags<br>- avg_distance_km<br>- flight_booked<br>- flight_booking_value |
+| hotel_travel_score       | - avg_rooms<br>- avg_hotel_nights<br>- hotel_booked<br>- hotel_booking_value |
+| cancellation_score       | - cancellation_rate                                                      |
 
-**booking frequency**
-| metric | description | formula | data type |
-| --- | --- | --- | --- |
-| flight_booked | Counts of flights booked | SUM(CASE WHEN s.flight_booked THEN 1 ELSE 0 END) | int |
-| hotel_booked | Counts of hotels booked | SUM(CASE WHEN s.hotel_booked THEN 1 ELSE 0 END) | int |
-
-**engagement**
-| metric | description | formula | data type |
-| --- | --- | --- | --- |
-| days_last_trip | Days since last trip | MAX(s.session_start) - MAX(t.trip_date) | int |
-| sessions_per_month | Average number of sessions per active month | cnt_sessions / month_active | float |
-| avg_session_duration_seconds | Average session duration in seconds | AVG(d.session_duration_seconds) | float |
-| page_click_per_session | Average page clicks per session | sum_page_clicks / cnt_sessions | float |
-
-**travel characteristics**
-| metric | description | formula | data type |
-| --- | --- | --- | --- |
-| avg_seats | Average number of seats booked | AVG(t.seats) | float |
-| avg_checked_bags | Average number of checked bags per trip | AVG(t.checked_bags) | float |
-| avg_flight_travel_days | Average number of flight travel days | AVG(t.flight_travel_days) | float |
-| avg_distance_km | Average flight distance in km | AVG(6371 * acos(...)) | float |
-| avg_rooms | Average number of hotel rooms per trip | AVG(t.rooms) | float |
-| avg_hotel_nights | Average number of hotel nights per trip | AVG(t.nights) | float |
-
-**spending & value**
-| metric | description | formula | data type |
-| --- | --- | --- | --- |
-| flight_booking_value | Average flight booking value | sum_flight_price / total_booking_value |  
-| hotel_booking_value | Average hotel booking value | sum_hotel_price / total_booking_value |  
-
-**price sensitivity & discounts**
-| metric | description | formula | data type |
-| --- | --- | --- | --- |
-| avg_flight_discount | Average flight discount rate | AVG(s.flight_discount_amount) | float |
-| avg_hotel_discount | Average hotel discount rate | AVG(s.hotel_discount_amount) | float |
-| discount_per_km | Flight discount per km traveled | sum_flight_discount / sum_distance_km | float |
-| flight_discount_rate | Ratio of discounts per flight bookings | cnt_flight_discount / flight_booked | float |  
-| hotel_discount_rate | Ratio of discounts per hotel bookings | cnt_hotel_discount / hotel_booked | float |
-
-**cancellation behaviour**
-| metric | description | formula | data type |
-| --- | --- | --- | --- |
-| cancellation_rate | Share of trips that were cancelled | cnt_cancellations / cnt_trips | float |
 
 ## Methods
 1. **Data cleaning, EDA & Feature Engineering**  
@@ -95,20 +55,28 @@ First, several data preparation operations has been done such as missing value t
 
 ## Results
 
-
+![Segmentation-Table](../data/segmentation_table.png)
 
 
 ## Conclusion
-- Was lernen wir aus der Segmentierung?
-- Wie könnten die Segmente konkret angesprochen werden?
-- Weitere Verbesserungsideen (z. B. zusätzliche Features, andere Clustering-Algorithmen)?
+- Both clustering models performed well on the scaled feature groups. Redundant and high correlated features must be excluded. This process is iterative and with each new feature group the models needs to be inspected. In order to find the targeted segments, the models performed best when features have been separated by flight and hotel user. Overall travel features have been therefore excluded.
+- Based on the resulting segments, the different perks of the reward program can be applied to the targeted user groups:
+1. free hotel meal -> frequent hotel traveller  
+2. free checked bags -> frequent flight traveller  
+3. no cancellation fees -> frequent traveller with cancellations  
+4. exclusive flight discounts -> flight discount hunter  
+5. exclusive hotel discounts -> hotel discount hunter  
+6. 1 night free hotel with flight -> churn-risk users  
+
+- other cluster models like DBSCAN or `AgglomerativeClustering` could not be tested due to performance issues (these algorithms need high RAM power). The same is true for the `silhouette_score`.
 
 ---
 
 ## References
 - [KMeans-Dokumentation (scikit-learn)](https://scikit-learn.org/stable/modules/clustering.html#k-means)
 - [Customer Segmentation with Machine Learning: Targeting the Right Audience](https://medium.com/@byanalytixlabs/customer-segmentation-with-machine-learning-targeting-the-right-audience-656f5d2ce8f8)
-- [Project-Notebook](../notebooks/Segmentation.ipynb)
+- [Segmentation-Notebook](../notebooks/Segmentation.ipynb)  
+- [EDA-Notebook](../notebooks/EDA.ipynb)
 ---
 
-*(updated on: `2025-06-22`)*  
+*(updated on: `2025-06-29`)*  

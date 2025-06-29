@@ -26,9 +26,9 @@ Combining rule-based logic with ML-driven clusters helps improve **interpretabil
 ## Target Audience & Business Goal
 The main goal is to support a **personalized reward campaign** that motivates customers to:  
 
-- Book a **flight**  
-- Book a **hotel**  
-- Book **both**  
+- Book a flight  
+- Book a hotel  
+- Book both   
 
 The campaign aims to:  
 
@@ -43,7 +43,7 @@ Users receive **personalized push notifications** with tailored perks based on:
 To support this, a **user cohort** was identified in the first step using a **SQL-based data modeling pipeline**.
 
 ## Data
-- **Source**: TravelTide postgres database  
+- **Source**: TravelTide PostgreSQL database  
 - **Data Model**: [Data Model](../docs/data_model.md)
 - **Features**:  
 

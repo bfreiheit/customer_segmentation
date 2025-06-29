@@ -144,14 +144,20 @@ def plot_bivariate_series(
     metrics: list,
     n_cols: int = 4,
     plot_type: Callable = sns.barplot,
+    swap_axes: bool = False,
+    fig_width: int = 13,
+    fig_height: int = 26    
 ) -> None:
 
     n_rows = (len(metrics) + n_cols - 1) // n_cols
 
-    _, axes = plt.subplots(n_rows, n_cols, figsize=(13, n_rows * 2))
+    _, axes = plt.subplots(n_rows, n_cols, figsize=(fig_width, fig_height))
     axes = axes.flatten()
     for i, col_name in enumerate(metrics):
-        plot_type(data=df, x=category, y=col_name, ax=axes[i])
+        if swap_axes:
+            plot_type(data=df, x=col_name, y=category, ax=axes[i])
+        else:
+            plot_type(data=df, x=category, y=col_name, ax=axes[i])
         axes[i].set_title(f"{col_name}")
         axes[i].set_xlabel("")
         axes[i].set_ylabel("")

@@ -85,7 +85,7 @@ Run `make help` to see all available commands.
 Run tests with:
 ```bash
 pytest tests
-
+```
 ### 7. Create .env file
 Structure of the file:
 DB_HOST=localhost        # e.g. 'db.example.com'

@@ -29,16 +29,9 @@ To filter the data based on the potential perks, the user cohort has been determ
 | has_children | Indicator if the user has children (1 = yes, 0 = no) | CASE WHEN u.has_children THEN 1 ELSE 0 END | int |
 | is_married | Indicator if the user is married (1 = yes, 0 = no) | CASE WHEN u.married THEN 1 ELSE 0 END | int |
 
-**loyality**
-| metric | description | formula | data type |
-| --- | --- | --- | --- |
-| days_active | Active days (from signup to last session) | MAX(s.session_start) - MIN(u.sign_up_date) | int |
-| month_active | Active period in months | days_active / 30 | float |
-
 **booking frequency**
 | metric | description | formula | data type |
 | --- | --- | --- | --- |
-| trips_per_month | Average number of trips per active month | cnt_trips / month_active | float |
 | flight_booked | Counts of flights booked | SUM(CASE WHEN s.flight_booked THEN 1 ELSE 0 END) | int |
 | hotel_booked | Counts of hotels booked | SUM(CASE WHEN s.hotel_booked THEN 1 ELSE 0 END) | int |
 
@@ -48,13 +41,11 @@ To filter the data based on the potential perks, the user cohort has been determ
 | days_last_trip | Days since last trip | MAX(s.session_start) - MAX(t.trip_date) | int |
 | sessions_per_month | Average number of sessions per active month | cnt_sessions / month_active | float |
 | avg_session_duration_seconds | Average session duration in seconds | AVG(d.session_duration_seconds) | float |
+| page_click_per_session | Average page clicks per session | sum_page_clicks / cnt_sessions | float |
 
 **travel characteristics**
 | metric | description | formula | data type |
 | --- | --- | --- | --- |
-| avg_diff_trip_days | Average days between trips | AVG(t.trip_date - t.prev_trip_date) | float |
-| avg_days_advance_booking | Average advance booking time in days | AVG(t.trip_start_date - t.trip_date) | float |
-| avg_travel_days | Average travel duration in days | AVG(t.travel_days) | float |
 | avg_seats | Average number of seats booked | AVG(t.seats) | float |
 | avg_checked_bags | Average number of checked bags per trip | AVG(t.checked_bags) | float |
 | avg_flight_travel_days | Average number of flight travel days | AVG(t.flight_travel_days) | float |
@@ -65,7 +56,6 @@ To filter the data based on the potential perks, the user cohort has been determ
 **spending & value**
 | metric | description | formula | data type |
 | --- | --- | --- | --- |
-| avg_booking_value | Average booking value per trip | total_booking_value / cnt_trips | float |
 | flight_booking_value | Average flight booking value | sum_flight_price / total_booking_value |  
 | hotel_booking_value | Average hotel booking value | sum_hotel_price / total_booking_value |  
 
@@ -74,7 +64,6 @@ To filter the data based on the potential perks, the user cohort has been determ
 | --- | --- | --- | --- |
 | avg_flight_discount | Average flight discount rate | AVG(s.flight_discount_amount) | float |
 | avg_hotel_discount | Average hotel discount rate | AVG(s.hotel_discount_amount) | float |
-| total_discount_rate | Total discount rate on all bookings | (sum_flight_discount + sum_hotel_discount) / total_booking_value | float |
 | discount_per_km | Flight discount per km traveled | sum_flight_discount / sum_distance_km | float |
 | flight_discount_rate | Ratio of discounts per flight bookings | cnt_flight_discount / flight_booked | float |  
 | hotel_discount_rate | Ratio of discounts per hotel bookings | cnt_hotel_discount / hotel_booked | float |
@@ -86,30 +75,28 @@ To filter the data based on the potential perks, the user cohort has been determ
 
 ## Methods
 1. **Data cleaning, EDA & Feature Engineering**  
-First, several data preparation operations has been done such as missing value treatment, outlier capping, feature reduction and normalization.
+First, several data preparation operations has been done such as missing value treatment, feature reduction and normalization.
 
-   - Umgang mit fehlenden Werten  
-   - Normalisierung der numerischen Variablen  
-   - Erstellung neuer Features (falls relevant)
+   - missing values have been replaced with 0  
+   - before normalizing, skewed data have been log transformed (`numpy.log1p`)  
+   - for normalizing values the `StandardScaler` from `sklearn` has been applied    
+   - after scaling, a dimensionality reduction has been applied using `PCA` (Principal Component Analysis) 
 
 2. **Model selection**  
-   - Beschreibung der gewählten Clustering-Methode (z. B. `KMeans`)
-   - Begründung der gewählten Anzahl Cluster (z. B. Elbow-Methode, Silhouetten-Score)
+   - Two different clustering methods have been tested: `KMeans`, `GaussianMixture`
+   - The number of cluster has been determined based on the visualization of the Elbow-Method     
 
 3. **Evaluation**  
-   - Darstellung der gefundenen Clusterzentren
-   - Interpretation der Cluster
+   - The resulting cluster have been aggregated with mean values of features in order to inspect how well the models have distinguish values between cluster
+   Validation scores to compare the quality of cluster models:  
+   - The `adjusted_rand_score` (ARI) measures the similarity of cluster assignments
+   - The `davies_bouldin_score` "is defined as the average similarity measure of each cluster with its most similar cluster". Lower values indicating better clustering
+   - The `calinski_harabasz_score` (Variance Ratio Criterion) "is defined as ratio of the sum of between-cluster dispersion and of within-cluster dispersion.[...] higher Calinski-Harabasz score relates to a model with better defined clusters".  
 
 ## Results
 
-| Cluster | Beschreibung                                 | Beispielkunden             |
-|---------|---------------------------------------------|----------------------------|
-| 0       | Junge Erwachsene, niedrige Ausgaben          | Kunde 101, Kunde 203       |
-| 1       | Mittleres Einkommen, hohe Shopping-Frequenz | Kunde 333, Kunde 412       |
-| ...     | ...                                         | ...                        |
 
-*Optional*:  
-Füge hier auch Plots ein (z. B. Streudiagramm oder Cluster-Visualisierungen) mit einer kurzen Beschreibung.
+
 
 ## Conclusion
 - Was lernen wir aus der Segmentierung?

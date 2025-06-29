@@ -146,7 +146,7 @@ def plot_bivariate_series(
     plot_type: Callable = sns.barplot,
     swap_axes: bool = False,
     fig_width: int = 13,
-    fig_height: int = 26    
+    fig_height: int = 26,
 ) -> None:
 
     n_rows = (len(metrics) + n_cols - 1) // n_cols

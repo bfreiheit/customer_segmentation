@@ -20,7 +20,7 @@ customer_segmentation/
 ├── README.md
 ├── data
 │   ├── cohort_data.csv
-│   └── segmentation_results.csv
+│   ├── RFM_analysis_results.csv
 │   └── segmentation_results.csv
 ├── docs
 │   ├── customer_segmentation.md

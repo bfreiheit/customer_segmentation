@@ -19,6 +19,8 @@ customer_segmentation/
 ├── Makefile
 ├── README.md
 ├── data
+│   ├── cohort_data.csv
+│   └── segmentation_results.csv
 ├── docs
 │   ├── customer_segmentation.md
 │   ├── data_model.md

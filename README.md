@@ -5,9 +5,9 @@ This repository contains jupyter notebooks analyzing customer data:
 - [Segmentation-Notebook](../notebooks/Segmentation.ipynb)
 - [RFM-Notebook](../notebooks/RFM.ipynb)
 
-In the docs/ folder the data model and analysis is explained:
-[Data Model](../docs/data_model.md)  
-[Segmentation Documentation](../docs/customer_segmentation.md)
+In the docs/ folder the data model and analysis is explained:  
+- [Data Model](../docs/data_model.md)  
+- [Segmentation Documentation](../docs/customer_segmentation.md)  
 
 src/customer_segmentation/ contains source code.
 

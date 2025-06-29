@@ -88,7 +88,7 @@ pytest tests
 ```
 ### 7. Create .env file
 Structure of the file:
-DB_HOST=localhost        # e.g. 'db.example.com'
-DB_PORT=5432             # e.g. 3306 for MySQL
-DB_USER=admin
-DB_PASSWORD=yourpassword
+DB_HOST=localhost        # e.g. 'db.example.com'  
+DB_PORT=5432             # e.g. 3306 for MySQL  
+DB_USER=admin  
+DB_PASSWORD=yourpassword  

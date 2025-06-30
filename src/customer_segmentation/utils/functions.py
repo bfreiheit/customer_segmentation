@@ -1,6 +1,6 @@
 import importlib.resources as resources
 import os
-from typing import Callable
+from typing import Callable, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -39,11 +39,22 @@ def read_from_db(model_name: str) -> pd.DataFrame:
     with engine.connect() as connection:
         return pd.read_sql(query, connection)
 
-def export_files(df: pd.DataFrame, file_name: str) -> None:
+
+def read_or_write_csv(
+    file_name: str, df: Optional[pd.DataFrame] = None, to_read: bool = False
+) -> Optional[pd.DataFrame]:
     current_dir = os.getcwd()
     data_dir = os.path.join(current_dir, os.path.pardir, "data")
-    data_path = os.path.join(data_dir, file_name)    
-    df.to_csv(data_path, index=False, encoding="utf-8", sep=",")
+    data_path = os.path.join(data_dir, file_name)
+
+    if to_read:
+        return pd.read_csv(data_path, encoding="utf-8", sep=";")
+    else:
+        if df is not None:
+            df.to_csv(data_path, index=False, encoding="utf-8", sep=";")
+        else:
+            raise ValueError("DataFrame must be provided when writing.")
+
 
 # --------------------- preprocessing
 

@@ -93,7 +93,7 @@ These metrics helped ensure that the segments are both distinct and meaningful.
 
 ## Results
 
-![Segmentation-Table](../images/segmentation_table.png)
+![Segmentation-Table](../images/segmentation_table.png?v2)
 
 
 ## Conclusion  

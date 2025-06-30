@@ -8,3 +8,14 @@ SELECT
         hotel_per_room_usd * rooms * nights AS hotel_price       
     FROM hotels  
     WHERE hotel_per_room_usd * rooms * nights < 0;
+
+SELECT 
+    trip_id,
+    user_id,
+    MAX(CASE WHEN cancellation THEN 1 ELSE 0 END) AS is_cancelled,
+    MIN(session_start::date) AS trip_date,
+    MAX(session_start::date) AS last_trip_date
+FROM sessions
+WHERE trip_id IS NOT NULL
+GROUP BY trip_id, user_id
+HAVING MIN(session_start::date) != MAX(session_start::date);

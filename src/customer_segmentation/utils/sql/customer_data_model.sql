@@ -50,7 +50,7 @@ trip_agg AS (
     trip_id,
     user_id,
     MAX(CASE WHEN cancellation THEN 1 ELSE 0 END) AS is_cancelled,
-    MIN(session_start::date) AS trip_date
+    MAX(session_start::date) AS trip_date
   FROM sessions
   WHERE trip_id IS NOT NULL
   GROUP BY trip_id, user_id

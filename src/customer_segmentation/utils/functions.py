@@ -43,7 +43,7 @@ def export_files(df: pd.DataFrame, file_name: str) -> None:
     current_dir = os.getcwd()
     data_dir = os.path.join(current_dir, os.path.pardir, "data")
     data_path = os.path.join(data_dir, file_name)    
-    df.to_csv(data_path, index=False)
+    df.to_csv(data_path, index=False, encoding="utf-8", sep=",")
 
 # --------------------- preprocessing
 

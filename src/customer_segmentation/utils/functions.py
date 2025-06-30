@@ -48,10 +48,10 @@ def read_or_write_csv(
     data_path = os.path.join(data_dir, file_name)
 
     if to_read:
-        return pd.read_csv(data_path, encoding="utf-8", sep=";")
+        return pd.read_csv(data_path, encoding="utf-8-sig", sep=";")
     else:
         if df is not None:
-            df.to_csv(data_path, index=False, encoding="utf-8", sep=";")
+            df.to_csv(data_path, index=False, encoding="utf-8-sig", sep=";")
         else:
             raise ValueError("DataFrame must be provided when writing.")
 

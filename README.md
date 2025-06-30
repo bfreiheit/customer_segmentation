@@ -26,6 +26,10 @@ customer_segmentation/
 │   ├── customer_segmentation.md
 │   ├── data_model.md
 ├── images
+│   ├── gmm_cluster_table.png
+│   ├── kmeans_cluster_table.png
+│   ├── rfm_cluster_groups_table.png
+│   ├── rfm_groups_table.png
 │   └── segmentation_table.png
 ├── notebooks
 │   ├── EDA.ipynb

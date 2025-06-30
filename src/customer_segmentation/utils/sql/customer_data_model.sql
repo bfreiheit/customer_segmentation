@@ -145,13 +145,13 @@ CROSS JOIN max_date md
 WHERE 
     (md.max_session_date - u.birthdate::date) / 365 BETWEEN 18 AND 90
     -- reduce cohort to user who registered within last 12 months
-    AND u.sign_up_date::date >= md.max_session_date - INTERVAL '12 months'   
+    AND u.sign_up_date::date >= DATE_TRUNC('month', md.max_session_date) - INTERVAL '12 months'   
 GROUP BY 
     s.user_id, age, has_children, is_married
 HAVING
     -- min 5 sessions and 30 days active
   COUNT(s.session_id) >= 5
-  AND MAX(s.session_start::date) - MIN(u.sign_up_date::date) >= 30
+  --AND MAX(s.session_start::date) - MIN(u.sign_up_date::date) >= 30
   AND (
        -- users with no bookings
        MAX(CASE WHEN t.trip_id IS NOT NULL THEN s.session_start::date END) IS NULL

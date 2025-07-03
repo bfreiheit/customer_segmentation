@@ -37,15 +37,23 @@ customer_segmentation/
 │   └── Segmentation.ipynb
 ├── pyproject.toml
 ├── requirements-dev.txt
+├── sql
+│   ├── customer_data_model.sql
+│   └── data_exploration.sql
 ├── src
 │   ├── customer_segmentation
 │   │   ├── __init__.py
 │   │   └── utils
 │   │       ├── __init__.py
-│   │       ├── functions.py
-│   │       └── sql
-│   │           └── customer_data_model.sql
+│   │       ├── db_utils.py
+│   │       ├── file_io.py
+│   │       ├── plot_utils.py
+│   │       └── preprocessing.py
 └── tests
+    ├── test_db_utils.py
+    ├── test_file_io.py
+    ├── test_plot_utils.py
+    └── test_preprocessing.py
 ```
 
 ---

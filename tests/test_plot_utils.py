@@ -3,7 +3,7 @@ import unittest
 import matplotlib
 import pandas as pd
 
-from customer_segmentation.utils import functions
+from customer_segmentation.utils import plot_utils
 
 
 class TestPlots(unittest.TestCase):
@@ -13,7 +13,7 @@ class TestPlots(unittest.TestCase):
             {"date": pd.date_range("2020-01-01", periods=3), "values": [1, 2, 3]}
         )
         try:
-            functions.plot_time_series(df, x="date", y=["values"])
+            plot_utils.plot_time_series(df, x="date", y=["values"])
         except Exception as e:
             self.fail(f"Function raised an exception: {e}")
 

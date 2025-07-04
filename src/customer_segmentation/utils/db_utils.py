@@ -54,9 +54,7 @@ def read_from_db_to_df(sql_filename: str, db_mode: str = "remote") -> pd.DataFra
         return pd.read_sql(sql, connection)
 
 
-def write_df_to_db(
-    df: pd.DataFrame, tablename: str, db_mode: str = "local"
-) -> None:
+def write_df_to_db(df: pd.DataFrame, tablename: str, db_mode: str = "local") -> None:
     engine = get_engine(db_mode=db_mode)
 
     with engine.connect() as connection:

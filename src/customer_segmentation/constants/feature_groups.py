@@ -3,7 +3,7 @@ FEATURE_GROUPS = {
     "flight_discount_score": [
         "avg_flight_discount",
         "flight_discount_rate",
-        "discount_per_km",
+        "avg_distance_km"       
     ],
     # Hotel discounts
     "hotel_discount_score": [

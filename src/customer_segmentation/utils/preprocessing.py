@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+from typing import Tuple
+import matplotlib.pyplot as plt
 from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import PCA
 from sklearn.pipeline import make_pipeline
@@ -14,7 +16,7 @@ def get_binary_columns(df: pd.DataFrame) -> list:
     return binarry_cols
 
 
-def missing_data(df):
+def missing_data(df: pd.DataFrame) -> pd.DataFrame:
     total = df.isnull().sum().sort_values(ascending=False)
     total = total[total.apply(lambda x: x > 0)]
 
@@ -25,34 +27,11 @@ def missing_data(df):
     return pd.concat([total, Percentage], axis=1, keys=["Total", "Percentage"])
 
 
-def PCA_pipeline(df: pd.DataFrame, features: list, score_name: str) -> pd.DataFrame:
-    # 1. check skewness
-    skewness = df[features].skew(numeric_only=True)
-    highly_skewed = skewness[np.abs(skewness) > 0.75].index.to_list()
-    lowly_skewed = list(set(features) - set(highly_skewed))
+def apply_PCA(df: pd.DataFrame, features: list, score_name: str, n_components: int = 1) -> Tuple[pd.DataFrame, tuple]:
+    pca_info = []
+    pca = PCA(n_components=n_components)
+    score = pca.fit_transform(df[features])
 
-    # 2. define transformations
-    transformers = ColumnTransformer(
-        transformers=[
-            (
-                "log+scale",
-                make_pipeline(
-                    FunctionTransformer(np.log1p, feature_names_out="one-to-one"),
-                    StandardScaler(),
-                ),
-                highly_skewed,
-            ),
-            ("scale", StandardScaler(), lowly_skewed),
-        ]
-    )
-
-    # 3. transform data
-    X_transformed = transformers.fit_transform(df[features])
-
-    # 4. PCA
-    pca = PCA(n_components=1)
-    score = pca.fit_transform(X_transformed)
-
-    # 5. attach score to df
+    pca_info = (pca.explained_variance_ratio_.flatten(), pca.components_.flatten())   
     df[score_name] = score
-    return df
+    return df, pca_info

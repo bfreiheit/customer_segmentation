@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS customer_features (
     user_id BIGINT PRIMARY KEY,
     avg_flight_discount_log FLOAT,
-    flight_discount_rate_log FLOAT,
+    flight_discount_rate_log FLOAT,    
     discount_per_km_log FLOAT,
     avg_hotel_discount_log FLOAT,
     hotel_discount_rate_log FLOAT,
@@ -18,8 +18,7 @@ CREATE TABLE IF NOT EXISTS customer_features (
     hotel_booking_value_log FLOAT,
     cancellation_rate_log FLOAT,
     avg_flight_discount_scaled FLOAT,
-    flight_discount_rate_scaled FLOAT,
-    discount_per_km_scaled FLOAT,
+    flight_discount_rate_scaled FLOAT,    
     avg_hotel_discount_scaled FLOAT,
     hotel_discount_rate_scaled FLOAT,
     age_scaled FLOAT,

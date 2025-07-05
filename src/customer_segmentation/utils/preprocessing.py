@@ -1,7 +1,8 @@
+from typing import Tuple
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from typing import Tuple
-import matplotlib.pyplot as plt
 from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import PCA
 from sklearn.pipeline import make_pipeline
@@ -27,11 +28,13 @@ def missing_data(df: pd.DataFrame) -> pd.DataFrame:
     return pd.concat([total, Percentage], axis=1, keys=["Total", "Percentage"])
 
 
-def apply_PCA(df: pd.DataFrame, features: list, score_name: str, n_components: int = 1) -> Tuple[pd.DataFrame, tuple]:
+def apply_PCA(
+    df: pd.DataFrame, features: list, score_name: str, n_components: int = 1
+) -> Tuple[pd.DataFrame, tuple]:
     pca_info = []
     pca = PCA(n_components=n_components)
     score = pca.fit_transform(df[features])
 
-    pca_info = (pca.explained_variance_ratio_.flatten(), pca.components_.flatten())   
+    pca_info = (pca.explained_variance_ratio_.flatten(), pca.components_.flatten())
     df[score_name] = score
     return df, pca_info

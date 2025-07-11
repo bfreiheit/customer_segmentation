@@ -20,8 +20,17 @@ WHERE trip_id IS NOT NULL
 GROUP BY trip_id, user_id
 HAVING MIN(session_start::date) != MAX(session_start::date);
 
-select to_char(session_start::date, 'YYYY-MM'),
-count(distinct user_id) as cnt_user  
-from sessions 
-group by 1
-order by 1;
+WITH yearmonth AS (
+    SELECT 
+        TO_CHAR(session_start::date, 'YYYY-MM') AS ym,
+        COUNT(DISTINCT user_id) AS cnt_user  
+    FROM sessions 
+    GROUP BY 1
+    ORDER BY 1
+)
+SELECT 
+    ym,
+    cnt_user,
+    LAG(cnt_user, 12) OVER (ORDER BY ym) AS prev_cnt,
+    ROUND(((cnt_user * 1.0 / NULLIF(LAG(cnt_user, 12) OVER (ORDER BY ym), 0)) - 1) * 100, 2) AS perc_change
+FROM yearmonth;

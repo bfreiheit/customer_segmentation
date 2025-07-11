@@ -19,3 +19,9 @@ FROM sessions
 WHERE trip_id IS NOT NULL
 GROUP BY trip_id, user_id
 HAVING MIN(session_start::date) != MAX(session_start::date);
+
+select to_char(session_start::date, 'YYYY-MM'),
+count(distinct user_id) as cnt_user  
+from sessions 
+group by 1
+order by 1;

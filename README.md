@@ -9,7 +9,7 @@ In the docs/ folder the data model and analysis is explained:
 - [Data Model](../docs/data_model.md)  
 - [Segmentation Documentation](../docs/customer_segmentation.md)  
 - [Video Recording](https://www.loom.com/share/7d18488920a9420889f59ce04ef76719?sid=3b420213-1958-46ea-a336-03a443f8a883)  
-- [Segmentation Presentation](../docs/Customer_Segmentation_Presentation.pdf)
+- [Segmentation Presentation](../docs/Customer_Segmentation_Presentation.pdf?v2)
 
 src/customer_segmentation/ contains source code.
 

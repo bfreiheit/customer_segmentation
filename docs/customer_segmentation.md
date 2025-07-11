@@ -1,9 +1,5 @@
 # Customer Segmentation
 
-## Presentation
-
-[Video](https://www.loom.com/share/7d18488920a9420889f59ce04ef76719?sid=3b420213-1958-46ea-a336-03a443f8a883)
-
 ## Introduction
 Customer segmentation plays a crucial role in:  
 

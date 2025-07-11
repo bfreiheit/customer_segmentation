@@ -19,12 +19,12 @@ customer_segmentation/
 ├── Makefile
 ├── README.md
 ├── data
-│   ├── cohort_data.csv
 │   ├── RFM_analysis_results.csv
 │   └── segmentation_results.csv
 ├── docs
+│   ├── Customer Segmentation_Presentation.pdf
 │   ├── customer_segmentation.md
-│   ├── data_model.md
+│   └── data_model.md
 ├── images
 │   ├── gmm_cluster_table.png
 │   ├── kmeans_cluster_table.png
@@ -33,12 +33,17 @@ customer_segmentation/
 │   └── segmentation_table.png
 ├── notebooks
 │   ├── EDA.ipynb
+│   ├── Preprocessing.ipynb
 │   ├── RFM.ipynb
 │   └── Segmentation.ipynb
 ├── pyproject.toml
 ├── requirements-dev.txt
 ├── sql
+│   ├── create_customer_cohort.sql
+│   ├── create_customer_features.sql
+│   ├── customer_cohort_model_local.sql
 │   ├── customer_data_model.sql
+│   ├── customer_features_local.sql
 │   └── data_exploration.sql
 ├── src
 │   ├── customer_segmentation
@@ -50,9 +55,6 @@ customer_segmentation/
 │   │       ├── plot_utils.py
 │   │       └── preprocessing.py
 └── tests
-    ├── test_db_utils.py
-    ├── test_file_io.py
-    ├── test_plot_utils.py
     └── test_preprocessing.py
 ```
 

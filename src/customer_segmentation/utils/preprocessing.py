@@ -1,12 +1,7 @@
 from typing import Tuple
 
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
-from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import PCA
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import FunctionTransformer, StandardScaler
 
 
 def get_binary_columns(df: pd.DataFrame) -> list:

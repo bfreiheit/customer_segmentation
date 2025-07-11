@@ -1,15 +1,16 @@
 # Customer Segmentation
 
 This repository contains jupyter notebooks analyzing customer data:
-- [EDA-Notebook](../notebooks/EDA.ipynb)
-- [Segmentation-Notebook](../notebooks/Segmentation.ipynb)
-- [RFM-Notebook](../notebooks/RFM.ipynb)
+- [EDA-Notebook](notebooks/EDA.ipynb)
+- [Segmentation-Notebook](notebooks/Segmentation.ipynb)
+- [RFM-Notebook](notebooks/RFM.ipynb)
 
 In the docs/ folder the data model and analysis is explained:  
 - [Data Model](docs/data_model.md)  
-- [Segmentation Documentation](../docs/customer_segmentation.md)  
-- [Segmentation Presentation](../docs/Presentation.pdf)  
+- [Segmentation Documentation](docs/customer_segmentation.md)  
+- [Segmentation Presentation](docs/Presentation.pdf)  
 - [Video Recording](https://www.loom.com/share/7d18488920a9420889f59ce04ef76719?sid=3b420213-1958-46ea-a336-03a443f8a883)  
+
 src/customer_segmentation/ contains source code.
 
 ---
